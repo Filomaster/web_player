@@ -1,5 +1,39 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #333;
+  background-color: #222;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
+/* Grid settings */
+.container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 0.5fr 1.3fr 1fr 1fr;
+  grid-template-rows: 0.2fr 2.5fr 0.3fr;
+  gap: 0px 0px;
+  grid-template-areas:
+    "Header Header Header Header"
+    "Albums Songs Songs Songs"
+    "Albums Controls Controls Controls";
+}
+.Header {
+  grid-area: Header;
+}
+.Albums {
+  grid-area: Albums;
+}
+.Controls {
+  grid-area: Controls;
+}
+.Songs {
+  grid-area: Songs;
 }
