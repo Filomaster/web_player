@@ -22,7 +22,7 @@ import { mapGetters, mapMutations } from 'vuex'
             decodeTitle: (title) => decodeURI(title),
             setSelection: function(id){
                 this.$store.commit('SET_ALBUM_SELECTION', id)
-                this.$store.commit('SET_SONG_SELECTION', 0)
+                this.$store.commit('SET_SONG_SELECTION', 1)
                 this.$store.dispatch('fetchAlbum', this.getSelectedAlbum().title)
                 },
             // select: function(id) {this.selected = id; console.log(this.selected)}

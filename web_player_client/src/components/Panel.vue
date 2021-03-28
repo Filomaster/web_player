@@ -1,16 +1,54 @@
 <template>
     <div class="Controls">
-        <div class="buttons">
+        <audio id="player" ref="player" >
+            <source :src="track" id="audio_src" type="audio/mp3"/>
+        </audio>
+        <div v-if="player" class="buttons">
             <div><i class="icofont-ui-previous"></i></div>
-            <div><i class="icofont-ui-play"></i></div>
+            <div v-on:click="toogleAudio()">
+                <i v-if="!isPlaying" class="icofont-ui-play"></i>
+                <i v-else class="icofont-ui-pause"></i>
+            </div>
             <div><i class="icofont-ui-next"></i></div>
-
+        </div>
+        <div class="songInfo">
+            <div class="songName"></div>
         </div>
     </div>
 </template>
+
 <script>
+    
     export default {
-        name: "Panel"
+        name: "Panel",
+        data () {
+            return{
+                player: undefined,
+                isPlaying: false,
+            }
+        },
+        props: {
+            track: String
+        },
+        methods: {
+            toogleAudio () {
+                if(player.paused){
+                    player.play()
+                    this.isPlaying = true
+                }else{
+                    player.pause()
+                    this.isPlaying = false
+                } 
+            }
+        },
+        mounted (){
+            this.$watch('track', ()=> {
+                this.$refs.player.autoplay = true;
+                this.$refs.player.load();
+                this.isPlaying = true
+            })
+                this.player = this.$refs.player;
+        },
     }
 </script>
 <style scoped>

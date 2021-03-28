@@ -3,7 +3,7 @@
     <Header />
     <AlbumList />
     <SongList />
-    <Panel />
+    <Panel v-if="albums().length > 0 && songs().length > 0" :track="track"/>
     <!-- <h1>{{data.kurwa}}</h1> -->
   </div>
 </template>
@@ -13,6 +13,7 @@ import Header from './components/Header.vue'
 import AlbumList from './components/AlbumList.vue'
 import SongList from './components/SongList'
 import Panel from "./components/Panel"
+import { mapGetters} from 'vuex'
 
 export default {
   name: 'App',
@@ -21,6 +22,14 @@ export default {
     AlbumList,
     SongList,
     Panel
+  },
+  methods: {
+      ...mapGetters({ albums: 'getAlbums',songs: 'getSongs', getSong: 'getCurrentSong'}),
+  },
+  computed: {
+      track () { 
+          console.log("Song: " + this.getSong())
+          return 'http://192.168.0.234:8000/audio/?file=' + this.getSong() }
   },
   mounted(){
     this.$store.dispatch('firstFetch')
@@ -42,4 +51,5 @@ export default {
   height: 100%;
   position: absolute;
 }
+
 </style>

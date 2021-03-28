@@ -9,7 +9,7 @@ const url = require("url");
 const fs = require("fs");
 
 const { out } = require("./utils");
-const musicManager = require("./musicManager");
+const fileManager = require("./fileManager");
 const { fstat } = require("fs");
 out.checkColors();
 
@@ -50,22 +50,32 @@ const server = http.createServer(function (req, res) {
   switch (req.method) {
     case "GET":
       let parsedUrl = url.parse(req.url, true);
-      // console.log(req.method, parsedUrl);
       let resType;
       switch (parsedUrl.pathname) {
         case "/images/":
           let file = parsedUrl.query.file ?? "default";
           resType =
             "image/" + (file === "default" ? "png" : file.match(/\..{3}$/)[0].replace(".", ""));
-          res.setHeader("Content-Type", resType);
           let filePath =
             file === "default"
               ? path.join(__dirname, "../static/default.png")
               : path.join(__dirname, "../static/mp3/", file);
-          musicManager.getFile(filePath).then((data) => {
+          fileManager.getFile(filePath).then((data) => {
+            res.setHeader("Content-Type", resType);
             res.write(data);
             res.end();
           });
+          break;
+        case "/audio/":
+          resType = "audio/mpeg";
+          out.info("song request: ", parsedUrl.query);
+          fileManager
+            .getFile(path.join(__dirname, "../static/mp3/", parsedUrl.query.file))
+            .then((data) => {
+              res.setHeader("Content-Type", resType);
+              res.write(data);
+              res.end();
+            });
           break;
       }
 
@@ -76,14 +86,14 @@ const server = http.createServer(function (req, res) {
         let response;
         if (body.action == "first") {
           out.warn("first");
-          musicManager.getMusicList().then((out) => {
+          fileManager.getMusicList().then((out) => {
             res.write(JSON.stringify(out));
             res.end();
           });
         }
         if (body.action == "next") {
           out.warn("next");
-          musicManager.getSongs(decodeURI(body.album)).then((songs) => {
+          fileManager.getSongs(decodeURI(body.album)).then((songs) => {
             res.write(JSON.stringify({ files: songs }));
             res.end();
           });
@@ -101,5 +111,5 @@ const server = http.createServer(function (req, res) {
 
 server.listen(PORT, () => {
   out.info(`Started server on port ${PORT}`);
-  // musicManager.getMusicList().then((out) => console.log(out));
+  // fileManager.getMusicList().then((out) => console.log(out));
 });

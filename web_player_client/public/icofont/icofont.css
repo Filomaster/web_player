@@ -78,6 +78,21 @@ url("./fonts/icofont.woff") format("woff");
   content: "\ec80";
 }
 
+.icofont-favourite:before
+{
+  content: "\ef25";
+}
+
+.icofont-star:before
+{
+  content: "\f000";
+}
+
+.icofont-retro-music-disk:before
+{
+  content: "\ecac";
+}
+
 .icofont-xs
 {
   font-size: .5em;

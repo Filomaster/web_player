@@ -29,10 +29,12 @@ module.exports = {
       readDir(path.join(__dirname, "../static/mp3", album))
         .then((files) => {
           files.forEach((file) => {
-            songs.push({
-              file: encodeURI(file),
-              size: fs.statSync(path.join(__dirname, "../static/mp3", album, file)).size,
-            });
+            if (file.endsWith(".mp3")) {
+              songs.push({
+                file: encodeURI(file),
+                size: fs.statSync(path.join(__dirname, "../static/mp3", album, file)).size,
+              });
+            }
           });
           resolve(songs);
         })
