@@ -1,3 +1,8 @@
+@font-face {
+  font-family: Nerd;
+  src: url("./3270\ Narrow\ Nerd\ Font\ Complete.ttf") format("ttf");
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -17,13 +22,13 @@ body {
   width: 100%;
   overflow: hidden;
   display: grid;
-  grid-template-columns: 0.5fr 1.3fr 1fr 1fr;
-  grid-template-rows: 0.2fr 2.5fr 0.3fr;
+  grid-template-columns: 15% 85%;
+  grid-template-rows: 0.2fr 2.5fr;
   gap: 0px 0px;
   grid-template-areas:
-    "Header Header Header Header"
-    "Albums Songs Songs Songs"
-    "Albums Controls Controls Controls";
+    "Header Header"
+    "Albums Songs"
+    "Albums Controls";
 }
 .Header {
   grid-area: Header;

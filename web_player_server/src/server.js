@@ -11,15 +11,19 @@ const fs = require("fs");
 const { out } = require("./utils");
 const fileManager = require("./fileManager");
 const { fstat } = require("fs");
+const database = require("./databaseManager");
 out.checkColors();
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 
 let router = {
   setHeaders: function (res) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept"
+    );
     return res;
   },
   getPostBody: function (req) {
@@ -41,41 +45,92 @@ let router = {
   },
 };
 
+let parseUrl = (url) => {
+  const address = /(\/[a-zA-Z]+\/)|(\/[a-zA-Z ]+$)/;
+  const paramName = /(?:(?<=\?)[^\=]*(?=\=))|(?:(?<=\&)[^\=]*(?=\=))/;
+  const paramValue = /(?:(?<=\=)[^\=]*(?=$))|(?:(?<=\=)[^\=]*(?=\&))/;
+};
+
 const server = http.createServer(function (req, res) {
-  // console.log(req.method);
-  // res.setHeader("Access-Control-Allow-Origin", "*");
-  // res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-  // res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res = router.setHeaders(res);
   switch (req.method) {
     case "GET":
       let parsedUrl = url.parse(req.url, true);
       let resType;
+      out.warn(parsedUrl.pathname);
+      // out.error(req.url);
       switch (parsedUrl.pathname) {
+        case "":
+          console.log(parsedUrl.query);
+          break;
+        case "/admin":
+          res.setHeader("Content-Type", "text/html");
+          fs.readFile(
+            path.join(__dirname, "../static/admin/index.html"),
+            (err, data) => {
+              if (err) {
+                out.error(err);
+                res.statusCode = 404;
+              } else res.write(data);
+              res.end();
+            }
+          );
+          break;
         case "/images/":
-          let file = parsedUrl.query.file ?? "default";
+          let file = parsedUrl.query.file;
+          file = file != null ? parsedUrl.query.file : "default";
           resType =
-            "image/" + (file === "default" ? "png" : file.match(/\..{3}$/)[0].replace(".", ""));
+            "image/" +
+            (file === "default"
+              ? "png"
+              : file.match(/\..{3}$/)[0].replace(".", ""));
           let filePath =
             file === "default"
               ? path.join(__dirname, "../static/default.png")
               : path.join(__dirname, "../static/mp3/", file);
           fileManager.getFile(filePath).then((data) => {
             res.setHeader("Content-Type", resType);
-            res.write(data);
+            res.write(data.data);
             res.end();
           });
           break;
         case "/audio/":
           resType = "audio/mpeg";
-          out.info("song request: ", parsedUrl.query);
+          out.info("song request: ", parsedUrl.query.file);
+          if (parsedUrl.query.file == "null") {
+            res.end();
+            break;
+          }
           fileManager
-            .getFile(path.join(__dirname, "../static/mp3/", parsedUrl.query.file))
-            .then((data) => {
+            .getFile(
+              path.join(__dirname, "../static/mp3/", parsedUrl.query.file)
+            )
+            .then((file) => {
               res.setHeader("Content-Type", resType);
-              res.write(data);
+              res.setHeader("Content-Length", file.size),
+                res.setHeader("Accept-Ranges", "bytes");
+              res.write(file.data);
               res.end();
             });
+          break;
+        case "/dirs":
+          fileManager
+            .readDir(path.join(__dirname, "../static/mp3"))
+            .then((dirs) => {
+              res.write(JSON.stringify(dirs));
+              res.end();
+            });
+          break;
+        default:
+          res.statusCode = 404;
+          fs.readFile(
+            path.join(__dirname, "../static/admin/error.html"),
+            (err, data) => {
+              if (err) out.error(err);
+              else res.write(data);
+              res.end();
+            }
+          );
           break;
       }
 
@@ -84,19 +139,30 @@ const server = http.createServer(function (req, res) {
       router.getPostBody(req).then((body) => {
         res.setHeader("Content-Type", "application/json");
         let response;
-        if (body.action == "first") {
-          out.warn("first");
-          fileManager.getMusicList().then((out) => {
-            res.write(JSON.stringify(out));
+        switch (body.action) {
+          case "first":
+            out.warn("first");
+            fileManager.getMusicList().then((out) => {
+              database.getPlaylist().then((playlist) => {
+                out.playlist = playlist;
+
+                res.write(JSON.stringify(out));
+                res.end();
+              });
+            });
+            break;
+          case "next":
+            out.warn("next");
+            fileManager.getSongs(decodeURI(body.album)).then((songs) => {
+              res.write(JSON.stringify({ files: songs }));
+              res.end();
+            });
+            break;
+          case "save":
+            out.warn("save");
+            database.update(body.playlist);
             res.end();
-          });
-        }
-        if (body.action == "next") {
-          out.warn("next");
-          fileManager.getSongs(decodeURI(body.album)).then((songs) => {
-            res.write(JSON.stringify({ files: songs }));
-            res.end();
-          });
+            break;
         }
       });
 

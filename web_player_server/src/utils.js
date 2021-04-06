@@ -28,7 +28,10 @@ let parseArguments = (args) => {
   for (let i = 0; i < args.length; i++) {
     if (typeof args[i] == "object") {
       let string = JSON.stringify(args[i]);
-      string = string.length > PRETTY_LENGTH ? JSON.stringify(args[i], null, 2) : string;
+      string =
+        string.length > PRETTY_LENGTH
+          ? JSON.stringify(args[i], null, 2)
+          : string;
       out += "\n" + string + ", ";
     } else out += args[i] + (args.length > 1 ? ", " : " ");
   }
@@ -37,6 +40,15 @@ let parseArguments = (args) => {
 
 // Main module
 module.exports = {
+  colors: {
+    red: "\x1b[31m",
+    green: "\x1b[32m",
+    yellow: "\x1b[33m",
+    blue: "\x1b[34m",
+    magenta: "\x1b[35m",
+    cyan: "\x1b[36m",
+    white: "\x1b[37m",
+  },
   // All methods related to output
   out: {
     /**
@@ -45,7 +57,9 @@ module.exports = {
      */
     debug: (...message) => {
       if (OUT_LVL <= 0)
-        console.log(formattedMessage("DEBUG", "\x1b[37m") + parseArguments(message));
+        console.log(
+          formattedMessage("DEBUG", "\x1b[37m") + parseArguments(message)
+        );
     },
     /**
      * This method prints provided arguments as info level message
@@ -54,8 +68,13 @@ module.exports = {
     info: (...message) => {
       if (OUT_LVL <= 1)
         console.log(
-          formattedMessage("INFO", "\x1b[34m") + parseArguments(message) + (COLOR ? "\x1b[0m" : "")
+          formattedMessage("INFO", "\x1b[34m") +
+            parseArguments(message) +
+            (COLOR ? "\x1b[0m" : "")
         );
+    },
+    print: (color = "\x1b[37m", title = "OUT", ...message) => {
+      console.log(formattedMessage(title, color) + parseArguments(message));
     },
     /**
      * This method prints provided arguments as warning level message
@@ -64,7 +83,9 @@ module.exports = {
     warn: (...message) => {
       if (OUT_LVL <= 2)
         console.log(
-          formattedMessage("WARN", "\x1b[33m") + parseArguments(message) + (COLOR ? "\x1b[0m" : "")
+          formattedMessage("WARN", "\x1b[33m") +
+            parseArguments(message) +
+            (COLOR ? "\x1b[0m" : "")
         );
     },
     /**
@@ -74,7 +95,9 @@ module.exports = {
     error: (...message) => {
       if (OUT_LVL <= 3)
         console.log(
-          formattedMessage("ERROR", "\x1b[31m") + parseArguments(message) + (COLOR ? "\x1b[0m" : "")
+          formattedMessage("ERROR", "\x1b[31m") +
+            parseArguments(message) +
+            (COLOR ? "\x1b[0m" : "")
         );
     },
     /**
